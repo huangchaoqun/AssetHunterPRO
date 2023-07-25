@@ -120,6 +120,10 @@ namespace HeurekaGames.AssetHunterPRO
             return AH_SettingsManager.Instance.BuildInfoPath;
         }
 
+        internal static string GetAssetBundleExtension()
+        {
+            return AH_SettingsManager.Instance.AssetBundleExtension;
+        }
         internal static string GetSettingFolder()
         {
             string userpreferencesPath = AH_SettingsManager.Instance.UserPreferencePath;

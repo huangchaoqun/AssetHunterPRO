@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
@@ -234,16 +235,32 @@ namespace HeurekaGames.AssetHunterPRO
 
         private void addAssetBundlesToReport()
         {
-            string[] assetBundleNames = AssetDatabase.GetAllAssetBundleNames();
-
-            foreach (var bundleName in assetBundleNames)
+            // string[] assetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+            //
+            // foreach (var bundleName in assetBundleNames)
+            // {
+            //     foreach (var bundledAssetPath in AssetDatabase.GetAssetPathsFromAssetBundle(bundleName))
+            //     {
+            //         //TODO add assetbundle as path? (But that requires some refactor since we assume that to be a scene rather than a bundle NB: IF we do that we need to make sure dependencies are still being added in AddBuildDependency method
+            //         AddBuildDependency("", bundledAssetPath);
+            //     }
+            // }
+            var abExtension = AH_SerializationHelper.GetAssetBundleExtension();
+            for (int i = BuildReportInfoList.Count - 1; i >= 0; i--)
             {
-                foreach (var bundledAssetPath in AssetDatabase.GetAssetPathsFromAssetBundle(bundleName))
+                var path = BuildReportInfoList[i].Path;
+                if (Path.GetExtension(path) == abExtension)
                 {
-                    //TODO add assetbundle as path? (But that requires some refactor since we assume that to be a scene rather than a bundle NB: IF we do that we need to make sure dependencies are still being added in AddBuildDependency method
-                    AddBuildDependency("", bundledAssetPath);
+                    var ab = AssetBundle.LoadFromFile(path);
+                    var assetNames = ab.GetAllAssetNames();
+                    foreach (var assetName in assetNames)
+                    {
+                        AddBuildDependency(null, assetName);
+                    }
+                    ab.Unload(true);
                 }
             }
+            AssetDatabase.RemoveUnusedAssetBundleNames();
         }
 
         internal void AddBuildDependency(string scenePath, string assetPath)

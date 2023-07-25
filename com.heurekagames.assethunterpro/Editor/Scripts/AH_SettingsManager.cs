@@ -54,6 +54,7 @@ namespace HeurekaGames.AssetHunterPRO
         private readonly static string PrefsIgnoredFolders = "AH.IgnoredFolders" + ProjectPostFix;
         private readonly static string PrefsUserPrefPath = "AH.UserPrefPath" + ProjectPostFix;
         private readonly static string PrefsBuildInfoPath = "AH.BuildInfoPath" + ProjectPostFix;
+        private readonly static string PrefsAssetBundleExtension = "AH.AssetBundleExtension" + ProjectPostFix;
 
         internal readonly static bool InitialValueAutoCreateLog = true;
         internal readonly static bool InitialValueAutoOpenLog = false;
@@ -64,6 +65,7 @@ namespace HeurekaGames.AssetHunterPRO
         internal readonly static bool InitialIgnoreScriptFiles = true;
         internal readonly static string InitialUserPrefPath = Application.dataPath + System.IO.Path.DirectorySeparatorChar + "AH_Prefs";
         internal readonly static string InitialBuildInfoPath = System.IO.Directory.GetParent(Application.dataPath).FullName + System.IO.Path.DirectorySeparatorChar + "SerializedBuildInfo";
+        internal readonly static string InitialAssetBundleExtension = ".ab";
 
 
         //Types to Ignore by default
@@ -186,7 +188,18 @@ namespace HeurekaGames.AssetHunterPRO
             }
             internal set { EditorPrefs.SetString(PrefsBuildInfoPath, value); }
         }
-
+        public string AssetBundleExtension
+        {
+            get
+            {
+                if (EditorPrefs.HasKey(PrefsAssetBundleExtension))
+                    return EditorPrefs.GetString(PrefsAssetBundleExtension);
+                else
+                    return InitialAssetBundleExtension;
+            }
+            internal set { EditorPrefs.SetString(PrefsAssetBundleExtension, value); }
+        }
+        
         public GUIContent[] GUIcontentignoredLists = new GUIContent[5]
      {
                 new GUIContent("Endings"),
@@ -235,6 +248,7 @@ namespace HeurekaGames.AssetHunterPRO
             IgnoreScriptFiles = AH_SettingsManager.InitialIgnoreScriptFiles;
             UserPreferencePath = AH_SettingsManager.InitialUserPrefPath;
             BuildInfoPath = AH_SettingsManager.InitialBuildInfoPath;
+            AssetBundleExtension = AH_SettingsManager.InitialAssetBundleExtension;
         }
 
         internal void DrawIgnored()
@@ -305,6 +319,7 @@ namespace HeurekaGames.AssetHunterPRO
 
             UserPreferencePath = drawSettingsFolder("User prefs", UserPreferencePath, AH_SettingsManager.InitialUserPrefPath);
             BuildInfoPath = drawSettingsFolder("Build info", BuildInfoPath, AH_SettingsManager.InitialBuildInfoPath);
+            
             EditorGUILayout.Space();
 
             EditorGUILayout.HelpBox("Settings", MessageType.None);
@@ -315,6 +330,7 @@ namespace HeurekaGames.AssetHunterPRO
             HideButtonText = drawSetting("Hide buttontexts", HideButtonText, AH_SettingsManager.InitialValueHideButtonText);
             HideNewsButton = drawSetting("Hide 'News' button", HideNewsButton, AH_SettingsManager.InitialValueHideNewsButton);
 
+            AssetBundleExtension = drawString("AssetBundle extension", AssetBundleExtension, AH_SettingsManager.InitialAssetBundleExtension);
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
             IgnoreScriptFiles = drawSetting("Ignore script files", IgnoreScriptFiles, AH_SettingsManager.InitialIgnoreScriptFiles);
@@ -364,6 +380,22 @@ namespace HeurekaGames.AssetHunterPRO
             return validPath;
         }
 
+        private string drawString(string title, string value, string defaultVal)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUIContent content = new GUIContent(title + ": ");
+
+            GUILayout.Label(content);
+
+            value = GUILayout.TextField(value);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+            if (string.IsNullOrEmpty(value))
+            {
+                value = defaultVal;
+            }
+            return value;
+        }
         private bool drawSetting(string title, bool value, bool defaultVal)
         {
             return EditorGUILayout.ToggleLeft(title, value, (defaultVal != value) ? EditorStyles.boldLabel : EditorStyles.label);
